@@ -13,19 +13,23 @@
     </h1>
     <ul>
         <li>
-            <%= product.brand %>
+            Brand: <%= product.brand %>
         </li>
         <li>
-            <%= product.price %>
+            Harga: <%= product.price %>
         </li>
         <li>
-            <%= product.color %>
+            Warna: <%= product.color %>
         </li>
         <li>
-            <%= product.size %>
+            Kategori: <a href="/products?category=<%= product.category %>"><%= product.category %></a>
         </li>
     </ul>
-    <a href="/products">ALL PRODUCTS</a>
+    <a href="/products">All Products</a>
+    <a href="/products/<%= product._id%>/edit">Edit Product</a>
+    <form action="/products/<%= product._id %>?_method=DELETE" method="post">
+        <button type="submit">Delete</button>
+    </form>
 </body>
 
 </html>
