@@ -4,6 +4,7 @@ const mongoose = require('mongoose')
 const methodOverride = require('method-override')
 const app = express()
 const Product = require('./models/product')
+const ErrorHandler = require('./ErrorHandler')
 
 // connect database
 mongoose.connect('mongodb://127.0.0.1/shopApp_db').then((result) => {
@@ -12,11 +13,17 @@ mongoose.connect('mongodb://127.0.0.1/shopApp_db').then((result) => {
     console.log(err)
 });
 
+
 app.set('views', path.join(__dirname, 'views'))
 app.set('view engine', 'ejs')
 app.use(express.urlencoded({ extended: true }))
 app.use(methodOverride('_method'))
 
+function wrapAsync(fn) {
+    return function (req, res, next) {
+        fn(req, res, next).catch(err => next(err));
+    }
+}
 app.get('/', (req, res) => {
     res.send('hello world')
 })
@@ -30,33 +37,56 @@ app.get('/products', async (req, res) => {
         res.render('products/index', { products, category: 'All' })
     }
 })
-app.post('/products', async (req, res) => {
+app.post('/products', wrapAsync(async (req, res) => {
     const products = new Product(req.body)
     await products.save()
     res.redirect(`/products/${products._id}`)
-})
+}))
 app.get('/products/create', (req, res) => {
     res.render('products/create')
 })
-app.get('/products/:id', async (req, res) => {
+app.get('/products/:id', wrapAsync(async (req, res) => {
     const { id } = req.params
     const product = await Product.findById(id)
     res.render('products/show', { product })
-})
-app.get('/products/:id/edit', async (req, res) => {
+}))
+app.get('/products/:id/edit', wrapAsync(async (req, res) => {
     const { id } = req.params
     const product = await Product.findById(id)
     res.render('products/edit', { product })
-})
-app.put('/products/:id', async (req, res) => {
+}))
+app.put('/products/:id', wrapAsync(async (req, res) => {
     const { id } = req.params
     const product = await Product.findByIdAndUpdate(id, req.body, { runValidators: true })
     res.redirect(`/products/${product._id}`)
-})
-app.delete('/products/:id', async (req, res) => {
+}))
+app.delete('/products/:id', wrapAsync(async (req, res) => {
     const { id } = req.params
     await Product.findByIdAndDelete(id)
     res.redirect("/products")
+}))
+
+//MIDDLEWARE
+const validatorHandler = err => {
+    err.status = 400
+    err.message = Object.values(err.errors).map(item => item.message)
+    return new ErrorHandler(err.message, err.status)
+}
+const castHandler = err => {
+    err.status = 404
+    err.message = "Product Not Found"
+    return new ErrorHandler(err.message, err.status)
+}
+app.use((err, req, res, next) => {
+    console.dir(err)
+    if (err.name === 'ValidationError') err = validatorHandler(err)
+    if (err.name === 'CastError') err = castHandler(err)
+    next(err)
+})
+
+app.use((err, req, res, next) => {
+    const { status = 500, message = 'Something went wrong' } = err
+    res.status(status).send(message)
 })
 
 app.listen(8080, () => {
