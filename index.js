@@ -40,14 +40,63 @@ app.get('/garments', wrapAsync(async (req, res) => {
     res.render('garments/index', { garments })
 }))
 
+// ROUTE FORM TAMBAH GARMENT BARU
 app.get('/garments/create', (req, res) => {
     res.render('garments/create')
 })
 
+// ROUTE TAMBAH GARMENT BARU
 app.post('/garments', wrapAsync(async (req, res) => {
     const garment = new Garment(req.body)
     await garment.save()
     res.redirect(`/garments`)
+}))
+
+// ROUTE DETAIL GARMENT
+app.get('/garments/:id', wrapAsync(async (req, res) => {
+    const { id } = req.params
+    const garment = await Garment.findById(id).populate('products')
+    res.render('garments/show', { garment })
+}))
+
+// ROUTE TAMBAH PRODUK BERDASARKAN ID GARMENT
+app.get('/garments/:garment_id/products', (req, res) => {
+    const { garment_id } = req.params
+    res.render('products/create', { garment_id })
+})
+
+// ROUTE TAMBAH PRODUK DI GARMENT
+app.post('/garments/:garment_id/products', wrapAsync(async (req, res) => {
+    const { garment_id } = req.params
+    const garment = await Garment.findById(garment_id)
+    const product = new Product(req.body)
+    garment.products.push(product)
+    product.garment = garment
+    await garment.save()
+    await product.save()
+    res.redirect(`/garments/${garment_id}`)
+}))
+
+// ROUTE TAMPILKAN FORM EDIT GARMENT
+app.get('/garments/:id/edit', wrapAsync(async (req, res) => {
+    const { id } = req.params
+    const garment = await Garment.findById(id)
+    res.render('garments/edit', { garment })
+}))
+
+// ROUTE UBAH DATA PABRIK
+app.put('/garments/:id', wrapAsync(async (req, res) => {
+    const { id } = req.params
+    const garment = await Garment.findByIdAndUpdate(id, req.body, { runValidators: true })
+    res.redirect(`/garments/${garment._id}`)
+}))
+
+app.delete('/garments/:garment_id', wrapAsync(async(req, res) => {
+    const {garment_id} = req.params
+    await Garment.findOneAndDelete({
+        _id: garment_id
+    })
+    res.redirect('/garments')
 }))
 
 //------ROUTING PRODUCT------
@@ -70,7 +119,7 @@ app.post('/products', wrapAsync(async (req, res) => {
     res.redirect(`/products/${products._id}`)
 }))
 
-// ROUTE HALAMAM FORM TAMBAH PRODUK
+// ROUTE HALAMAN FORM TAMBAH PRODUK
 app.get('/products/create', (req, res) => {
     res.render('products/create')
 })
@@ -78,7 +127,7 @@ app.get('/products/create', (req, res) => {
 // HALAMAN DETAIL PRODUK
 app.get('/products/:id', wrapAsync(async (req, res) => {
     const { id } = req.params
-    const product = await Product.findById(id)
+    const product = await Product.findById(id).populate('garment')
     res.render('products/show', { product })
 }))
 

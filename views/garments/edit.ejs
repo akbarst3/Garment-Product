@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Garment</title>
+</head>
+
+<body>
+    <h1>Edit Garment</h1>
+    <form action="/garments/<%= garment._id %>?_method=PUT"
+        method="post">
+        <label for="name">Nama Garment</label>
+        <input type="text" name="name" id="name"
+            value="<%= garment.name %>">
+        <label for="location">Location</label>
+        <input type="text" name="location" id="location"
+            value="<%= garment.location %>">
+        <label for="contact">Contact</label>
+        <input type="text" name="contact" id="contact"
+            value="<%= garment.contact %>">
+        <button type="submit">Submit</button>
+        <form action="/garments/<%= garment._id %>">
+            <button type="submit">Back</button>
+        </form>
+    </form>
+
+</body>
+
+</html>

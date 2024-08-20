@@ -3,8 +3,9 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DETAIL PRODUCTS</title>
+    <title>Detail Product</title>
 </head>
 
 <body>
@@ -12,24 +13,35 @@
         <%= product.name %>
     </h1>
     <ul>
-        <li>
-            Brand: <%= product.brand %>
+        <li>Brand:
+            <%= product.brand %>
+        </li>
+        <li>Warna:
+            <%= product.color %>
+        </li>
+        <li>Harga:
+            <%= product.price %>
         </li>
         <li>
-            Harga: <%= product.price %>
-        </li>
-        <li>
-            Warna: <%= product.color %>
-        </li>
-        <li>
-            Kategori: <a href="/products?category=<%= product.category %>"><%= product.category %></a>
+            Category: <a
+                href="/products?category=<%= product.category %>">
+                <%= product.category %>
+            </a>
         </li>
     </ul>
+    <h2>Garment:</h2>
+    <ul>
+        <li><a href="/garments/<%= product.garment._id %>">
+                <%= product.garment.name %>
+            </a></li>
+    </ul>
     <a href="/products">All Products</a>
-    <a href="/products/<%= product._id%>/edit">Edit Product</a>
-    <form action="/products/<%= product._id %>?_method=DELETE" method="post">
+    <a href="/products/<%= product._id %>/edit">Edit</a>
+    <form action="/products/<%= product._id %>?_method=DELETE"
+        method="post">
         <button type="submit">Delete</button>
     </form>
+
 </body>
 
 </html>

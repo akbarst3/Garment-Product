@@ -20,6 +20,13 @@ const garmentSchema = new mongoose.Schema({
     }]
 })
 
+garmentSchema.post('findOneAndDelete', async function (garment) {
+    if (garment.products.length) {
+        const res = await Product.deleteMany({ _id: { $in: garment.products } })
+        console.log(res)
+    }
+})
+
 const Garment = mongoose.model('Garment', garmentSchema)
 
 module.exports = Garment
